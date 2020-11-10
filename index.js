@@ -23,6 +23,9 @@ client.on('ready', () => {
             message.reply("Wrong Parameters, Type `bs-help` to know more. ");
         }
     }
+    else if(msg==="bs-help"){
+      message.reply("Working on the help feature.");
+    }
   });
   
   client.login(process.env.DISCORD_BOT_TOKEN);
