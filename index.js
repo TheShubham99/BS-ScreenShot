@@ -22,8 +22,6 @@ client.on('ready', () => {
         else{
             message.reply("Wrong Parameters, Type `bs-help` to know more. ");
         }
-
-      //msg.reply('Pong!');
     }
   });
   
