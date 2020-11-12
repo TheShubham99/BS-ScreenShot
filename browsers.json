@@ -1,0 +1,10 @@
+{
+"Windows10":{
+    "os": "Windows",
+    "os_version": "10",
+    "browser": "chrome",
+    "device": null,
+    "browser_version": "71.0",
+    "real_mobile": null
+}
+}
