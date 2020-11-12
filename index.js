@@ -1,5 +1,17 @@
 require('dotenv').config();
+var fs = require('fs');
+
 const fetch = require("node-fetch");
+var browser_list;
+
+
+// Load browser List
+fs.readFile('./browsers.json', 'utf8', function (err,data) {
+  if (err) {
+    return console.log(err);
+  }
+  browser_list=JSON.parse(data);  
+});
 
 var BrowserStack = require("browserstack");
 var browserStackCredentials = {
@@ -7,11 +19,32 @@ var browserStackCredentials = {
     password: process.env.BSTACK_PASS
 };
 
-var browser_one;
-
 // REST API
 var screenshotClient = BrowserStack.createScreenshotClient(browserStackCredentials);
- 
+var screenshots_obj;
+
+async function checkStatus(job_id){
+  
+  await fetch(`https://www.browserstack.com/screenshots/`+job_id+`.json`).then(async (ss_obj)=>{
+    
+    screenshots_obj=await ss_obj.json();
+    screenshots_obj=screenshots_obj.screenshots;
+    console.log("Checking if screenshot is captured... :");
+    if(screenshots_obj[0].thumb_url===null){
+      setTimeout(()=>{
+        console.log("Trying Again...")
+        checkStatus(job_id)}
+        ,10000)
+    }
+    else{
+      console.log("Snap.. Gotcha... sharing the screenshot in 3..2..1..")
+    }
+}).catch((e)=>{
+  console.log("Fetching the ScreenShot job status again...")
+})
+
+}
+
 async function captureScreenShot(website_url,browser){
   var options={
     url:website_url,
@@ -20,42 +53,7 @@ async function captureScreenShot(website_url,browser){
 
   screenshotClient.generateScreenshots(options, async (error,job)=>{
     if(!error){
-        console.log(job['job_id']);
-        
-        
-       async function checkStatus(){
-
-          var out="None";
-        
-       await screenshotClient.getJob(job.job_id, async (error,job)=>{
-            if(!error){
-              console.log("Success ");
-                out=JSON.stringify(job);
-              }
-            
-            else{
-              out="get job failed";
-            }
-        })
-      
-        return out;
-      }
-
-        checkStatus().then((s)=>{
-          console.log(s);
-        });
-
-        var screenshot_res;
-        await fetch(`https://www.browserstack.com/screenshots/`+job.job_id+`.json`).then(async (r)=>{
-          screenshot_res=r;
-          let screenshots_obj=await screenshot_res.json();
-           screenshots_obj=screenshots_obj.screenshots;
-           console.log("SCREENSHOTS :");
-           console.log(screenshots_obj);
- 
-        }).catch((c)=>{
-
-        })
+        setTimeout(()=>checkStatus(job.job_id),1000);      
     }
     else{
       console.log(error);
@@ -65,12 +63,8 @@ async function captureScreenShot(website_url,browser){
 
 } 
 
- screenshotClient.getBrowsers(function(error, browsers) {
-    console.log("The following browsers are available for testing");
-    console.log(browsers[0]);
-    browser_one=browsers[0];
-});
 
+//Discord Initialization 
 
 const Discord = require('discord.js');
 const client = new Discord.Client();
@@ -88,9 +82,19 @@ client.on('ready', () => {
         
         msg=msg.split(' -')
         if(msg.length==3){
-            message.reply("Website is **"+msg[1]+"**");
-            message.reply("Device is **"+msg[2]+"**");
-            captureScreenShot(msg[1],browser_one);
+            captureScreenShot(msg[1],browser_list[msg[2].toString()]);
+            message.reply("Please Wait..Fetching the Screenshot...");  
+            var loop=setInterval(()=>{
+
+              if(screenshots_obj[0].thumb_url===null){
+                  setTimeout(()=>checkStatus(),1000);
+              }
+               else{ 
+              clearInterval(loop);
+              message.reply("**Thumbnail: **"+screenshots_obj[0].thumb_url);
+              message.reply("**Original Image: **"+screenshots_obj[0].image_url);
+               }
+            },10000)
         }
         else{
             message.reply("Wrong Parameters, Type `bs-help` to know more. ");
@@ -100,7 +104,7 @@ client.on('ready', () => {
       message.reply("Working on the help feature.");
     }
     else if(msg==='bs-browsers'){
-      message.reply(browser_one);
+      message.reply(browser_list);
     }
   });
   
