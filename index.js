@@ -154,7 +154,7 @@ client.on('message', message => {
             
             setTimeout(()=>{
               if(job_id!==0)
-                message.reply("**Your request is in the Queue.**\n\nRun `!bs-out "+job_id+'` after a minute to see the results.\n Run `bs-help` to understand the commands.');
+                message.reply("**Your request is in the Queue.**\n\nRun `!bs-out "+job_id+'` after a minute to see the results.\nRun `bs-help` to understand the commands.');
                 job_id=0;
             },2000)
             
