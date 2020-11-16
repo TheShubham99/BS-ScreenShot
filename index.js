@@ -14,6 +14,39 @@ var out_message="Pending";
 // Job Id to check the status, 0 is a default value
 var job_id=0;
 
+const help_msg="\n **About BS-Snap Bot**\n _This bot is made for testing out any website on various devices._\n\n **What It will do? **\n_It will send you the screenshots of the website you mentioned in the command._";
+const commands=` 
+**Commands: ** 
+
+1️⃣ 
+
+> **!snap -<url> -<device>** 
+
+_Takes a screenshot of <url> using <device>._
+                                  
+**Try**  !snap -https://google.com -windows-chrome\n
+**_<url>_** : https://google.com
+**_<device>_** : windows-chrome
+
+2️⃣
+
+> **!bs-devices** 
+
+_Returns the list of supported devices._
+
+3️⃣
+
+> **!bs-out -<token>**
+
+_Checks the status of the screenshot job and returns the screenshot if the job is completed._
+
+4️⃣
+
+> **!bs-help**
+
+_Returns this menu._
+`;
+
 /* <Initialization End> */
 /* ---------------------------------------------------------------- */
 
@@ -35,11 +68,16 @@ var browserStackCredentials = {
 };
 
 // ScreenShot API
-try{
-var screenshotClient = BrowserStack.createScreenshotClient(browserStackCredentials);
+
+try {
+
+    var screenshotClient = BrowserStack.createScreenshotClient(browserStackCredentials);
+
 }
-catch(e){
-  console.log("Couldn't login.. Please check for existing session...")
+catch(e) {
+
+    console.log("Couldn't login.. Please check for existing session...")
+
 }
 
 // Default/Empty Screenshot object
@@ -49,23 +87,23 @@ var screenshots_obj=[{"thumb_url":null}];
 // Check if ScreenShot is Captured and saves the message to out_message.
 async function checkStatus(job_id){
   
-  await fetch(`https://www.browserstack.com/screenshots/`+job_id+`.json`).then(async (ss_obj)=>{
-    
-    screenshots_obj=await ss_obj.json();
-    screenshots_obj=screenshots_obj.screenshots;
-    console.log("Checking if screenshot is captured... :");
-    if(screenshots_obj[0].thumb_url===null){
-          out_message="Pending";
+    await fetch(`https://www.browserstack.com/screenshots/`+job_id+`.json`).then(async (ss_obj)=>{
+      
+      screenshots_obj=await ss_obj.json();
+      screenshots_obj=screenshots_obj.screenshots;
+      console.log("Checking if screenshot is captured... :");
+      if(screenshots_obj[0].thumb_url===null){
+            out_message="Pending";
 
-    }
-    else{
-      out_message="\n**Thumbnail: **"+screenshots_obj[0].thumb_url+"\n\n**Original Image: **"+screenshots_obj[0].image_url;
-      console.log("Snap.. Gotcha... sharing the screenshot in 3..2..1..");
-    }
+      }
+      else{
+        out_message="\n**Thumbnail: **"+screenshots_obj[0].thumb_url+"\n\n**Original Image: **"+screenshots_obj[0].image_url;
+        console.log("Snap.. Gotcha... sharing the screenshot in 3..2..1..");
+      }
 
-}).catch((e)=>{
-  console.log("Fetching the ScreenShot job status again...");
-})
+      }).catch((e)=>{
+        console.log("Fetching the ScreenShot job status again...");
+      })
 
 }
 
@@ -101,9 +139,9 @@ client.on('ready', () => {
   client.on('message', message => {
       var msg=message.content;
 
-    if (msg.startsWith('!Snap')) {
+    if (msg.startsWith('!snap')) {
     
-        msg=msg.replace('!Snap','');
+        msg=msg.replace('!snap','');
         
         msg=msg.split(' -')
         if(msg.length==3){
@@ -113,7 +151,7 @@ client.on('ready', () => {
             
             setTimeout(()=>{
               if(job_id!==0)
-                message.reply("Your request is in the Queue.\n\nPlease run `-bs out "+job_id+'` after a minute to see the results.\n\n run `bs-help` to understand the commands.')
+                message.reply("**Your request is in the Queue.**\n\nRun `!bs-out "+job_id+'` after a minute to see the results.\n Run `bs-help` to understand the commands.');
                 job_id=0;
             },2000)
             
@@ -122,10 +160,10 @@ client.on('ready', () => {
             message.reply("Wrong Parameters, Type `bs-help` to know more. ");
         }
     }
-    else if(msg==="bs-help"){
-      message.reply("Working on the help feature.");
+    else if(msg==="!bs-help"){
+      message.reply(help_msg+"\n"+commands);
     }
-    else if(msg==='bs-devices'){
+    else if(msg==='!bs-devices'){
       var devices=Object.keys(browser_list);
 
       var devices_message="\n**Supported Devices: **\n\n";
@@ -136,12 +174,12 @@ client.on('ready', () => {
           devices_message=devices_message+"**`"+device+"`**\n";
       }
 
-      message.reply(devices_message)
+      message.reply(devices_message);
 
     }
-    else if(msg.startsWith('-bs out ')){
+    else if(msg.startsWith('!bs-out ')){
       message.reply("Checking the job status...")
-      msg=msg.replace('-bs out ','');
+      msg=msg.replace('!bs-out ','');
       checkStatus(msg);
       setTimeout(()=>{
         if(out_message==="Pending"){
