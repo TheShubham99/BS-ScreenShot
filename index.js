@@ -14,7 +14,7 @@ var out_message="Pending";
 // Job Id to check the status, 0 is a default value
 var job_id=0;
 
-// Message shown for help command
+// Message shown on help command
 const help_msg="\n **About BS-Snap Bot**\n _This bot is made for testing out any website on various devices._\n\n **What It will do? **\n_It will send you the screenshots of the website you mentioned in the command._";
 const commands=` 
 **Commands: ** 
@@ -130,14 +130,17 @@ async function captureScreenShot(website_url,browser){
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-
 // Discord Listners
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
+
+    client.user.setUsername("SnapBot");
+
   });
   
-  client.on('message', message => {
-      var msg=message.content;
+client.on('message', message => {
+    
+    var msg=message.content;
 
     if (msg.startsWith('!snap')) {
     
@@ -145,9 +148,8 @@ client.on('ready', () => {
         
         msg=msg.split(' -')
         if(msg.length==3){
-            try{
+
             captureScreenShot(msg[1],browser_list[msg[2].toString().toLowerCase()]);
-            
             message.reply("Please Wait..Fetching the Screenshot...");  
             
             setTimeout(()=>{
@@ -156,9 +158,6 @@ client.on('ready', () => {
                 job_id=0;
             },2000)
             
-          }catch(e){
-            message.reply("Wrong parameters or device name.\n Run `bs-help` to view the commands.");
-          }
         }
         else{
             message.reply("Wrong Parameters, Type `bs-help` to know more. ");
