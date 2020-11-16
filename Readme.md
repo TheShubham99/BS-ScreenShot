@@ -67,3 +67,8 @@ _Returns this menu._
 [MIT](https://choosealicense.com/licenses/mit/)
 
 Built with :heart: by _**[@TheShubham99](https://github.com/theshubham99)**_
+
+# Credits
+
+Landing Page Design Credits - [Alca](https://codepen.io/Alca)
+Landing Page Design [CodePen Link](https://codepen.io/Alca/pen/zEXwQM)
